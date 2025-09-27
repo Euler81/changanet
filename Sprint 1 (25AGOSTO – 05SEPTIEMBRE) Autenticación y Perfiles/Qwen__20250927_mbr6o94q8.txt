@@ -1,0 +1,52 @@
+D:\changanet\
+├── changanet-frontend\
+│   ├── public\
+│   │   └── index.html
+│   ├── src\
+│   │   ├── components\
+│   │   │   ├── modals\
+│   │   │   │   ├── LoginModal.jsx
+│   │   │   │   └── SignupModal.jsx
+│   │   │   └── dashboard\
+│   │   │       ├── ClientDashboard.jsx
+│   │   │       └── ProfessionalDashboard.jsx
+│   │   ├── pages\
+│   │   │   ├── Home.jsx
+│   │   │   ├── Professionals.jsx
+│   │   │   ├── ProfessionalDetail.jsx
+│   │   │   └── Dashboard.jsx
+│   │   ├── context\
+│   │   │   └── AuthContext.jsx
+│   │   ├── App.jsx
+│   │   └── main.jsx
+│   ├── tailwind.config.js
+│   ├── postcss.config.js
+│   ├── package.json
+│   └── README.md
+└── changanet-backend\
+    ├── prisma\
+    │   └── schema.prisma
+    ├── src\
+    │   ├── controllers\
+    │   │   ├── authController.js
+    │   │   ├── profileController.js
+    │   │   ├── searchController.js
+    │   │   ├── messageController.js
+    │   │   ├── reviewController.js
+    │   │   └── availabilityController.js
+    │   ├── routes\
+    │   │   ├── authRoutes.js
+    │   │   ├── profileRoutes.js
+    │   │   ├── searchRoutes.js
+    │   │   ├── messageRoutes.js
+    │   │   ├── reviewRoutes.js
+    │   │   └── availabilityRoutes.js
+    │   ├── middleware\
+    │   │   └── authenticate.js
+    │   ├── services\
+    │   │   └── notificationService.js
+    │   └── server.js
+    ├── .env
+    ├── .gitignore
+    ├── package.json
+    └── README.md

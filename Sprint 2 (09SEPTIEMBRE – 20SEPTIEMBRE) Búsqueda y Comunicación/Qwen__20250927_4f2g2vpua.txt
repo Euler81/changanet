@@ -1,0 +1,41 @@
+D:\changanet\
+├── changanet-frontend\
+│   ├── src\
+│   │   ├── components\
+│   │   │   ├── SearchBar.jsx
+│   │   │   ├── ProfessionalCard.jsx
+│   │   │   └── modals\
+│   │   │       ├── LoginModal.jsx
+│   │   │       └── SignupModal.jsx
+│   │   ├── pages\
+│   │   │   ├── Home.jsx
+│   │   │   ├── Professionals.jsx
+│   │   │   ├── ProfessionalDetail.jsx
+│   │   │   └── Dashboard.jsx
+│   │   ├── context\
+│   │   │   └── AuthContext.jsx
+│   │   ├── App.jsx
+│   │   └── main.jsx
+│   └── ...
+└── changanet-backend\
+    ├── prisma\
+    │   └── schema.prisma
+    ├── src\
+    │   ├── controllers\
+    │   │   ├── authController.js
+    │   │   ├── profileController.js
+    │   │   ├── searchController.js
+    │   │   ├── messageController.js
+    │   │   └── reviewController.js
+    │   ├── routes\
+    │   │   ├── authRoutes.js
+    │   │   ├── profileRoutes.js
+    │   │   ├── searchRoutes.js
+    │   │   ├── messageRoutes.js
+    │   │   └── reviewRoutes.js
+    │   ├── middleware\
+    │   │   └── authenticate.js
+    │   ├── services\
+    │   │   └── notificationService.js
+    │   └── server.js
+    └── ...

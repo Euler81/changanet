@@ -1,0 +1,25 @@
+D:\changanet\
+├── changanet-frontend\
+│   ├── src\
+│   │   ├── components\
+│   │   │   ├── AvailabilityCalendar.jsx
+│   │   │   ├── ReviewForm.jsx
+│   │   │   └── ... (archivos anteriores)
+│   │   ├── pages\
+│   │   │   ├── Reviews.jsx
+│   │   │   ├── Availability.jsx
+│   │   │   └── ... (archivos anteriores)
+│   │   └── ... (demás archivos)
+└── changanet-backend\
+    ├── prisma\
+    │   └── schema.prisma (ya actualizado en Sprint 2)
+    ├── src\
+    │   ├── controllers\
+    │   │   ├── availabilityController.js
+    │   │   ├── reviewController.js
+    │   │   └── ... (controladores anteriores)
+    │   ├── routes\
+    │   │   ├── availabilityRoutes.js
+    │   │   ├── reviewRoutes.js
+    │   │   └── ... (rutas anteriores)
+    │   └── ... (demás archivos)
