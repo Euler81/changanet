@@ -1,0 +1,25 @@
+D:\changanet\
+├── changanet-frontend\
+│   ├── src\
+│   │   ├── components\
+│   │   │   ├── QuoteRequestForm.jsx
+│   │   │   ├── VerificationForm.jsx
+│   │   │   └── ... (archivos anteriores)
+│   │   ├── pages\
+│   │   │   ├── Quotes.jsx
+│   │   │   ├── VerifyIdentity.jsx
+│   │   │   └── ... (archivos anteriores)
+│   │   └── ... (demás archivos)
+└── changanet-backend\
+    ├── prisma\
+    │   └── schema.prisma (actualizado)
+    ├── src\
+    │   ├── controllers\
+    │   │   ├── quoteController.js
+    │   │   ├── verificationController.js
+    │   │   └── ... (controladores anteriores)
+    │   ├── routes\
+    │   │   ├── quoteRoutes.js
+    │   │   ├── verificationRoutes.js
+    │   │   └── ... (rutas anteriores)
+    │   └── ... (demás archivos)

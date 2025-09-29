@@ -1,0 +1,25 @@
+D:\changanet\
+├── changanet-frontend\
+│   ├── src\
+│   │   ├── components\
+│   │   │   ├── NotificationBell.jsx
+│   │   │   ├── NotificationCenter.jsx
+│   │   │   └── ... (archivos anteriores)
+│   │   ├── pages\
+│   │   │   ├── Notifications.jsx
+│   │   │   └── ... (archivos anteriores)
+│   │   └── ... (demás archivos)
+└── changanet-backend\
+    ├── prisma\
+    │   └── schema.prisma (ya actualizado en Sprint 4)
+    ├── src\
+    │   ├── controllers\
+    │   │   ├── notificationController.js
+    │   │   └── ... (controladores anteriores)
+    │   ├── routes\
+    │   │   ├── notificationRoutes.js
+    │   │   └── ... (rutas anteriores)
+    │   ├── services\
+    │   │   ├── emailService.js
+    │   │   └── pushNotificationService.js
+    │   └── ... (demás archivos)

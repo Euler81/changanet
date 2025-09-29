@@ -1,0 +1,42 @@
+D:\changanet\
+├── changanet-frontend\
+│   ├── src\
+│   │   ├── components\
+│   │   │   └── ... (archivos anteriores)
+│   │   ├── pages\
+│   │   │   └── ... (archivos anteriores)
+│   │   └── ... (demás archivos)
+│   ├── tests\
+│   │   ├── unit\
+│   │   │   └── ... (tests unitarios)
+│   │   └── integration\
+│   │       └── ... (tests de integración)
+│   ├── docs\
+│   │   └── api-documentation.md
+│   └── ... (demás archivos)
+└── changanet-backend\
+    ├── prisma\
+    │   └── ... (archivos anteriores)
+    ├── src\
+    │   ├── controllers\
+    │   │   └── ... (controladores anteriores)
+    │   ├── routes\
+    │   │   └── ... (rutas anteriores)
+    │   ├── middleware\
+    │   │   └── ... (middleware anterior)
+    │   ├── services\
+    │   │   └── ... (servicios anteriores)
+    │   ├── tests\
+    │   │   ├── unit\
+    │   │   │   └── ... (tests unitarios)
+    │   │   └── integration\
+    │   │       └── ... (tests de integración)
+    │   ├── docs\
+    │   │   └── swagger.yaml
+    │   └── server.js (actualizado)
+    ├── .env.production
+    ├── ecosystem.config.js
+    ├── jest.config.js
+    ├── .gitignore (actualizado)
+    ├── package.json (actualizado)
+    └── README.md (actualizado)
