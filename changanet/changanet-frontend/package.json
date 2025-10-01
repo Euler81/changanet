@@ -1,0 +1,30 @@
+{
+  "name": "changanet-frontend",
+  "private": true,
+  "version": "0.1.0",
+  "dependencies": {
+    "@tailwindcss/postcss": "^4.1.13",
+    "@testing-library/jest-dom": "^6.9.0",
+    "@testing-library/react": "^16.3.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.4.0",
+    "socket.io-client": "^4.8.1"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.17",
+    "@types/react-dom": "^18.0.6",
+    "@vitejs/plugin-react": "^4.3.1",
+    "autoprefixer": "^10.4.8",
+    "jsdom": "^20.0.0",
+    "postcss": "^8.4.16",
+    "tailwindcss": "^3.1.8",
+    "vite": "^4.5.0",
+    "vitest": "^3.2.4"
+  }
+}

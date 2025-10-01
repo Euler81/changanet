@@ -1,0 +1,151 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model usuarios {
+  id              String   @id @default(uuid())
+  email           String   @unique
+  hash_contrasena String
+  nombre          String
+  telefono        String?
+  rol             Rol      @default(cliente)
+  esta_verificado Boolean  @default(false)
+  creado_en       DateTime @default(now())
+  actualizado_en  DateTime?
+
+  perfil_profesional          perfiles_profesionales?
+  servicios_como_cliente      servicios[] @relation("ServicioCliente")
+  servicios_como_profesional  servicios[] @relation("ServicioProfesional")
+  resenas_escritas            resenas[]
+  mensajes_enviados           mensajes[] @relation("MensajeRemitente")
+  mensajes_recibidos          mensajes[] @relation("MensajeDestinatario")
+  disponibilidad              disponibilidad[]
+  notificaciones              notificaciones[]
+  cotizaciones_como_cliente   cotizaciones[] @relation("CotizacionCliente")
+  cotizaciones_como_profesional cotizaciones[] @relation("CotizacionProfesional")
+}
+
+model perfiles_profesionales {
+  usuario_id                  String              @id @default(uuid())
+  usuario                     usuarios            @relation(fields: [usuario_id], references: [id])
+
+  especialidad                String
+  anos_experiencia            Int?
+  zona_cobertura              String
+  tarifa_hora                 Float
+  descripcion                 String?
+  url_foto_perfil             String?
+  estado_verificacion         EstadoVerificacion  @default(pendiente)
+  verificado_en               DateTime?
+  url_documento_verificacion  String?
+}
+
+model servicios {
+  id             String         @id @default(uuid())
+  cliente_id     String
+  cliente        usuarios       @relation("ServicioCliente", fields: [cliente_id], references: [id])
+  profesional_id String
+  profesional    usuarios       @relation("ServicioProfesional", fields: [profesional_id], references: [id])
+  descripcion    String
+  estado         EstadoServicio @default(pendiente)
+  fecha_agendada DateTime?
+  creado_en      DateTime       @default(now())
+  completado_en  DateTime?
+  resena         resenas?
+}
+
+model resenas {
+  id            String   @id @default(uuid())
+  servicio_id   String   @unique
+  servicio      servicios @relation(fields: [servicio_id], references: [id])
+  cliente_id    String
+  cliente       usuarios @relation(fields: [cliente_id], references: [id])
+  calificacion  Int
+  comentario    String?
+  url_foto      String?
+  creado_en     DateTime @default(now())
+}
+
+model mensajes {
+  id             String   @id @default(uuid())
+  remitente_id   String
+  remitente      usuarios @relation("MensajeRemitente", fields: [remitente_id], references: [id])
+  destinatario_id String
+  destinatario   usuarios @relation("MensajeDestinatario", fields: [destinatario_id], references: [id])
+  contenido      String
+  url_imagen     String?
+  esta_leido     Boolean  @default(false)
+  creado_en      DateTime @default(now())
+}
+
+model disponibilidad {
+  id             String   @id @default(uuid())
+  profesional_id String
+  profesional    usuarios @relation(fields: [profesional_id], references: [id])
+  fecha          DateTime
+  hora_inicio    DateTime
+  hora_fin       DateTime
+  esta_disponible Boolean @default(true)
+}
+
+model notificaciones {
+  id         String           @id @default(uuid())
+  usuario_id String
+  usuario    usuarios         @relation(fields: [usuario_id], references: [id])
+  tipo       TipoNotificacion
+  mensaje    String
+  esta_leido Boolean          @default(false)
+  creado_en  DateTime         @default(now())
+}
+
+model cotizaciones {
+  id             String           @id @default(uuid())
+  cliente_id     String
+  cliente        usuarios         @relation("CotizacionCliente", fields: [cliente_id], references: [id])
+  profesional_id String
+  profesional    usuarios         @relation("CotizacionProfesional", fields: [profesional_id], references: [id])
+  descripcion    String
+  estado         EstadoCotizacion @default(pendiente)
+  precio         Float
+  comentario     String?
+  creado_en      DateTime         @default(now())
+  aceptado_en    DateTime?
+  rechazado_en   DateTime?
+}
+
+enum Rol {
+  cliente
+  profesional
+}
+
+enum EstadoVerificacion {
+  pendiente
+  verificado
+  rechazado
+}
+
+enum EstadoServicio {
+  pendiente
+  agendado
+  completado
+  cancelado
+}
+
+enum TipoNotificacion {
+  nuevo_mensaje
+  nueva_cotizacion
+  servicio_agendado
+  resena_recibida
+  pago_liberado
+}
+
+enum EstadoCotizacion {
+  pendiente
+  aceptado
+  rechazado
+}

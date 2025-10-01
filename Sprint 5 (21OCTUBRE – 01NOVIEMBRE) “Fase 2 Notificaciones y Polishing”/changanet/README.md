@@ -1,6 +1,6 @@
-# 🚀 CÓMO EJECUTAR EL SPRINT 4
+# 🚀 CÓMO EJECUTAR EL SPRINT 5
 
-> **Resumen:** Guía paso a paso para desplegar y probar los cambios del Sprint 4 en entorno local.
+> **Resumen:** Guía paso a paso para desplegar y probar los cambios del Sprint 5 en entorno local.
 
 ---
 
@@ -9,7 +9,8 @@
 * Node.js y npm instalados.
 * Acceso al repositorio / archivos nuevos del Backend y Frontend.
 * Puerto por defecto del frontend: `5173`.
-* Prisma instalado y configurado para la base de datos.
+* Prisma configurado y base de datos conectada.
+* Credenciales de correo (para Nodemailer).
 
 ---
 
@@ -17,23 +18,34 @@
 
 1. Detén el backend si está corriendo (presiona `Ctrl + C` en la terminal donde corre).
 2. Reemplaza los archivos del backend con los nuevos archivos proporcionados.
-3. Actualiza la base de datos:
+3. Instala las nuevas dependencias:
 
 ```bash
-# Ejecutar migraciones y generar cliente de Prisma
-npx prisma migrate dev --name add_quotes_and_verification
+npm install nodemailer
+```
+
+4. Actualiza la base de datos:
+
+```bash
 npx prisma generate
 ```
 
-4. Inicia el backend:
+5. Configura las variables de entorno en el archivo `.env`:
+
+```env
+EMAIL_USER=tu-email@gmail.com
+EMAIL_PASS=tu-contraseña-o-app-password
+FRONTEND_URL=http://localhost:5173
+```
+
+6. Inicia el backend:
 
 ```bash
-# Desde la carpeta del backend
-npm install    # (si hay paquetes nuevos)
+npm install    # por si hay dependencias nuevas adicionales
 npm run dev
 ```
 
-> Nota: revisa que el servidor arranque sin errores y que Prisma esté conectado a la base de datos correctamente.
+> Nota: revisa la salida de consola para confirmar que Nodemailer esté inicializado y que Prisma reconozca la conexión a la base de datos.
 
 ---
 
@@ -44,8 +56,7 @@ npm run dev
 3. Inicia el frontend:
 
 ```bash
-# Desde la carpeta del frontend
-npm install    # (si hay paquetes nuevos)
+npm install    # por si hay nuevas dependencias
 npm run dev
 ```
 
@@ -54,34 +65,33 @@ npm run dev
 ## Paso 3: ¡Probar!
 
 1. Abre tu navegador en: `http://localhost:5173`.
-2. Inicia sesión como **cliente** y solicita un presupuesto.
-3. Inicia sesión como **profesional** y responde a la solicitud.
-4. Inicia sesión como **profesional** y ve a **"Verificar Identidad"** para enviar documentos.
+2. Inicia sesión y realiza alguna acción que genere notificaciones (ej.: enviar mensaje, solicitar presupuesto, etc.).
+3. Verifica que las notificaciones se muestren en la **campana** con contador.
+4. Prueba las **animaciones y transiciones** mejoradas.
 
 ---
 
 ## 🎯 RESULTADO ESPERADO
 
-Al finalizar el Sprint 4, tendrás:
+Al finalizar el Sprint 5, tendrás:
 
-* **Backend:** APIs de cotizaciones y verificación funcionando.
-* **Frontend:** Interfaces para solicitar y responder cotizaciones, y para verificar identidad.
-* **Conexión Real:** El frontend se comunica con el backend para gestionar todo el flujo de cotizaciones.
+* **Backend:** Sistema de notificaciones completo (email, push, in-app).
+* **Frontend:** Centro de notificaciones, campana con contador, y componentes de UI mejorados.
+* **Experiencia de Usuario:** Interfaz más pulida, con animaciones y feedback visual.
 
 ---
 
 ## Comprobaciones rápidas / Troubleshooting
 
-* Si Prisma da error: revisa tu archivo `.env` con la cadena de conexión a la base de datos.
-* Si el frontend no carga: revisa que el backend esté corriendo y que el frontend apunte al endpoint correcto.
-* Si hay errores CORS: habilitar CORS temporalmente en el backend o configurar proxy en el frontend.
-* Si faltan dependencias: ejecutar `npm install` en backend/frontend.
-* Si el puerto `5173` está ocupado: cambiar puerto o detener el proceso que lo use.
+* Si no llegan los emails: revisa credenciales `EMAIL_USER` y `EMAIL_PASS` en `.env`.
+* Si Prisma falla: confirma la cadena de conexión en `.env` y vuelve a correr `npx prisma generate`.
+* Si el frontend no refleja cambios: limpiar cache (`Ctrl + Shift + R`) o borrar carpeta `node_modules` y reinstalar.
+* Verifica que el backend y frontend estén corriendo en los puertos correctos.
 
 ---
 
 ## Buenas prácticas
 
-* Antes de reemplazar archivos, hacer un `git status` y `git stash` si tenés cambios locales.
-* Mantener abiertos los logs de backend y frontend.
-* Documentar errores reproducibles y sus soluciones para el equipo.
+* Nunca subas el archivo `.env` a GitHub ni a repositorios públicos.
+* Mantén abiertos los logs para revisar errores en tiempo real.
+* Documenta los errores reproducibles y comparte con el equipo para seguimiento.
