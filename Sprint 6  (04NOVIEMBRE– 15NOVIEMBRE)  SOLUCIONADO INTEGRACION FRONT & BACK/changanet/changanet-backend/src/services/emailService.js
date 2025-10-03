@@ -39,7 +39,7 @@ exports.sendWelcomeEmail = async (user) => {
     <p>Saludos,<br>El equipo de Changánet</p>
   `;
 
-  await this.sendEmail(user.email, subject, html);
+  await exports.sendEmail(user.email, subject, html);
 };
 
 exports.sendQuoteRequestEmail = async (professional, client, quoteRequest) => {

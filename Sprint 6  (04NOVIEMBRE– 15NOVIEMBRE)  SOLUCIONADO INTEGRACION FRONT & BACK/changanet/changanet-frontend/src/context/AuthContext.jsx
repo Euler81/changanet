@@ -30,6 +30,31 @@ export const AuthProvider = ({ children }) => {
     setUser(userData);
   };
 
+  // Método para manejar login con Google (puede ser usado por el GoogleLoginButton)
+  const loginWithGoogle = (userData, token) => {
+    // El login con Google funciona igual que el login regular
+    login(userData, token);
+  };
+
+  const signup = async (name, email, password, role) => {
+    try {
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password, role })
+      });
+      const data = await response.json();
+
+      if (response.ok) {
+        return { success: true, message: data.message };
+      } else {
+        return { success: false, error: data.error };
+      }
+    } catch (error) {
+      return { success: false, error: 'Error de conexión. Inténtalo de nuevo.' };
+    }
+  };
+
   const logout = () => {
     localStorage.removeItem('changanet_token');
     localStorage.removeItem('changanet_user');
@@ -37,7 +62,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, login, logout, signup, loginWithGoogle, loading }}>
       {children}
     </AuthContext.Provider>
   );

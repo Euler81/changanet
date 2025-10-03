@@ -104,10 +104,10 @@ model mensajes {
   remitente      usuarios @relation("MensajeRemitente", fields: [remitente_id], references: [id])
   destinatario_id String  // FK que enlaza con el usuario destinatario
   destinatario   usuarios @relation("MensajeDestinatario", fields: [destinatario_id], references: [id])
-  contenido      String   // REQ-17: Texto del mensaje
-  url_imagen     String?  // REQ-18: URL de la imagen adjunta
+  contenido      String
+  url_imagen     String?
   esta_leido     Boolean  @default(false)
-  creado_en      DateTime @default(now()) // Fecha de creación del mensaje
+  creado_en      DateTime @default(now())
 }
 
 // MODELO: disponibilidad

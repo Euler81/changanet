@@ -8,6 +8,8 @@ const helmet = require('helmet'); // Seguridad HTTP
 const morgan = require('morgan'); // Logging
 const compression = require('compression'); // Compresión de respuestas
 const rateLimit = require('rate-limiter-flexible'); // Limitación de tasa
+const passport = require('./config/passport'); // Configuración de Passport
+const session = require('express-session'); // Sesiones para Passport
 
 // Importar rutas y middlewares
 const authRoutes = require('./routes/authRoutes');
@@ -62,8 +64,27 @@ const rateLimiterMiddleware = (req, res, next) => {
 app.use(rateLimiterMiddleware);
 
 // Middleware estándar
-app.use(cors());
+app.use(cors({
+  origin: process.env.FRONTEND_URL || "http://localhost:5173",
+  credentials: true
+}));
 app.use(express.json({ limit: '10mb' })); // Limitar tamaño de payloads
+
+// Middleware de sesión para Passport
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'changanet-session-secret',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production', // Solo HTTPS en producción
+    httpOnly: true,
+    maxAge: 24 * 60 * 60 * 1000 // 24 horas
+  }
+}));
+
+// Inicializar Passport
+app.use(passport.initialize());
+app.use(passport.session());
 
 // Ruta de documentación API
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));

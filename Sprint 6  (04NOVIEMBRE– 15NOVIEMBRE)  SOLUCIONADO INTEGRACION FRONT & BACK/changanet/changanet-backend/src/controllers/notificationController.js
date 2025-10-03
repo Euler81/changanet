@@ -29,7 +29,7 @@ exports.markAsRead = async (req, res) => {
         id: notificationId,
         usuario_id: userId
       },
-      data: { está_leído: true }
+      data: { esta_leido: true }
     });
 
     res.status(200).json(notification);
@@ -46,9 +46,9 @@ exports.markAllAsRead = async (req, res) => {
     const result = await prisma.notificaciones.updateMany({
       where: {
         usuario_id: userId,
-        está_leído: false
+        esta_leido: false
       },
-      data: { está_leído: true }
+      data: { esta_leido: true }
     });
 
     res.status(200).json({ message: `${result.count} notificaciones marcadas como leídas.` });

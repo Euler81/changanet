@@ -1,39 +1,43 @@
-// src/pages/Quotes.jsx
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const Quotes = () => {
+  const { user } = useAuth();
   const [quotes, setQuotes] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState('received'); // 'received' for professionals, 'sent' for clients
 
   useEffect(() => {
-    const fetchQuotes = async () => {
-      try {
-        const response = await fetch('/api/quotes/professional', {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('changanet_token')}`
-          }
-        });
-        const data = await response.json();
+    if (user) {
+      fetchQuotes();
+    }
+  }, [user, activeTab]);
 
-        if (response.ok) {
-          setQuotes(data);
-        } else {
-          setError(data.error || 'Error al cargar cotizaciones');
+  const fetchQuotes = async () => {
+    setLoading(true);
+    try {
+      const endpoint = user.role === 'profesional'
+        ? `/api/quotes/professional`
+        : `/api/quotes/client`;
+
+      const response = await fetch(endpoint, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('changanet_token')}`
         }
-      } catch (err) {
-        setError('Error de red. Intenta nuevamente.');
-      } finally {
-        setLoading(false);
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setQuotes(data);
       }
-    };
+    } catch (error) {
+      console.error('Error fetching quotes:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchQuotes();
-  }, []);
-
-  const handleRespond = async (quoteId, action, precio, comentario) => {
+  const respondToQuote = async (quoteId, action, price = null, comment = null) => {
     try {
       const response = await fetch('/api/quotes/respond', {
         method: 'POST',
@@ -41,123 +45,187 @@ const Quotes = () => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('changanet_token')}`
         },
-        body: JSON.stringify({ quoteId, action, precio, comentario })
+        body: JSON.stringify({
+          quoteId,
+          action,
+          precio: price,
+          comentario: comment
+        })
       });
-      const data = await response.json();
 
       if (response.ok) {
-        setQuotes(prev => prev.map(q => q.id === quoteId ? data : q));
-        alert(`Cotización ${action === 'accept' ? 'aceptada' : 'rechazada'} con éxito.`);
+        // Refresh quotes
+        fetchQuotes();
+        alert(action === 'accept' ? 'Cotización aceptada exitosamente' : 'Cotización rechazada');
       } else {
-        alert(data.error || 'Error al responder');
+        const data = await response.json();
+        alert(data.error || 'Error al procesar la respuesta');
       }
-    } catch (err) {
-      alert('Error de red. Intenta nuevamente.');
+    } catch (error) {
+      console.error('Error responding to quote:', error);
+      alert('Error de conexión');
     }
   };
 
+  const handleAccept = (quoteId) => {
+    const price = prompt('Ingresa el precio para este servicio:');
+    if (price && !isNaN(price)) {
+      const comment = prompt('Comentario adicional (opcional):');
+      respondToQuote(quoteId, 'accept', parseFloat(price), comment);
+    }
+  };
+
+  const handleReject = (quoteId) => {
+    const reason = prompt('Razón del rechazo (opcional):');
+    respondToQuote(quoteId, 'reject', null, reason);
+  };
+
   if (loading) {
-    return <div className="container mx-auto px-4 py-8">Cargando...</div>;
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-turquoise-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-emerald-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 text-lg">Cargando cotizaciones...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">Cotizaciones Recibidas</h1>
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-turquoise-50">
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-6xl mx-auto">
+          <h1 className="text-4xl font-bold mb-8 bg-gradient-to-r from-emerald-600 to-turquoise-600 bg-clip-text text-transparent">
+            {user.role === 'profesional' ? 'Mis Cotizaciones' : 'Mis Solicitudes de Presupuesto'}
+          </h1>
 
-      {error && (
-        <div className="bg-red-100 text-red-700 p-3 rounded mb-4">
-          {error}
-        </div>
-      )}
+          {/* Tabs for professionals */}
+          {user.role === 'profesional' && (
+            <div className="flex space-x-1 mb-8 bg-white p-1 rounded-lg shadow-sm">
+              <button
+                onClick={() => setActiveTab('received')}
+                className={`flex-1 py-3 px-6 rounded-md font-medium transition-colors duration-200 ${
+                  activeTab === 'received'
+                    ? 'bg-emerald-600 text-white'
+                    : 'text-gray-600 hover:text-emerald-600'
+                }`}
+              >
+                Recibidas
+              </button>
+              <button
+                onClick={() => setActiveTab('sent')}
+                className={`flex-1 py-3 px-6 rounded-md font-medium transition-colors duration-200 ${
+                  activeTab === 'sent'
+                    ? 'bg-emerald-600 text-white'
+                    : 'text-gray-600 hover:text-emerald-600'
+                }`}
+              >
+                Enviadas
+              </button>
+            </div>
+          )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2">
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-2xl font-bold mb-4">Solicitudes de Clientes</h2>
+          {/* Quotes List */}
+          <div className="space-y-6">
+            {quotes.length === 0 ? (
+              <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
+                <div className="text-6xl mb-4">📋</div>
+                <h2 className="text-2xl font-bold text-gray-800 mb-4">
+                  {user.role === 'profesional' ? 'No tienes cotizaciones' : 'No has enviado solicitudes'}
+                </h2>
+                <p className="text-gray-600 mb-6">
+                  {user.role === 'profesional'
+                    ? 'Cuando los clientes te soliciten presupuestos, aparecerán aquí.'
+                    : 'Cuando solicites presupuestos a profesionales, aparecerán aquí.'
+                  }
+                </p>
+                {user.role === 'cliente' && (
+                  <a
+                    href="/profesionales"
+                    className="bg-emerald-600 text-white px-6 py-3 rounded-lg hover:bg-emerald-700 transition-colors duration-200 font-medium"
+                  >
+                    Buscar Profesionales
+                  </a>
+                )}
+              </div>
+            ) : (
+              quotes.map(quote => (
+                <div key={quote.id} className="bg-white rounded-2xl shadow-lg p-6">
+                  <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start">
+                    <div className="flex-1">
+                      <div className="flex items-start justify-between mb-4">
+                        <div>
+                          <h3 className="text-xl font-bold text-gray-800 mb-2">
+                            {quote.descripcion}
+                          </h3>
+                          <p className="text-gray-600 mb-2">
+                            <span className="font-medium">Zona:</span> {quote.zona_cobertura}
+                          </p>
+                          <p className="text-gray-600 mb-2">
+                            <span className="font-medium">
+                              {user.role === 'profesional' ? 'Cliente:' : 'Profesional:'}
+                            </span>{' '}
+                            {user.role === 'profesional' ? quote.cliente.nombre : quote.profesional.nombre}
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            {new Date(quote.creado_en).toLocaleDateString()}
+                          </p>
+                        </div>
 
-            {quotes.length > 0 ? (
-              <div className="space-y-4">
-                {quotes.map(quote => (
-                  <div key={quote.id} className="border rounded-lg p-4 hover:shadow-md transition">
-                    <div className="flex justify-between">
-                      <div>
-                        <h3 className="font-semibold">{quote.cliente.nombre}</h3>
-                        <p className="text-gray-600">{quote.descripción}</p>
+                        <div className="text-right">
+                          <span className={`px-4 py-2 rounded-full text-sm font-medium ${
+                            quote.estado === 'pendiente' ? 'bg-amber-100 text-amber-800' :
+                            quote.estado === 'aceptado' ? 'bg-emerald-100 text-emerald-800' :
+                            'bg-red-100 text-red-800'
+                          }`}>
+                            {quote.estado === 'pendiente' ? 'Pendiente' :
+                             quote.estado === 'aceptado' ? 'Aceptada' : 'Rechazada'}
+                          </span>
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <span className={`px-2 py-1 rounded-full text-xs ${
-                          quote.estado === 'aceptado' ? 'bg-green-100 text-green-800' :
-                          quote.estado === 'rechazado' ? 'bg-red-100 text-red-800' :
-                          'bg-yellow-100 text-yellow-800'
-                        }`}>
-                          {quote.estado.charAt(0).toUpperCase() + quote.estado.slice(1)}
-                        </span>
-                        <p className="text-gray-500 text-sm mt-1">
-                          {new Date(quote.creado_en).toLocaleDateString()}
-                        </p>
-                      </div>
+
+                      {quote.estado === 'aceptado' && quote.precio && (
+                        <div className="bg-emerald-50 p-4 rounded-lg mb-4">
+                          <p className="text-emerald-800 font-medium">
+                            Precio acordado: ${quote.precio}
+                          </p>
+                          {quote.comentario && (
+                            <p className="text-emerald-700 text-sm mt-1">
+                              {quote.comentario}
+                            </p>
+                          )}
+                        </div>
+                      )}
+
+                      {quote.estado === 'rechazado' && quote.comentario && (
+                        <div className="bg-red-50 p-4 rounded-lg mb-4">
+                          <p className="text-red-800 font-medium">Razón del rechazo:</p>
+                          <p className="text-red-700 text-sm mt-1">{quote.comentario}</p>
+                        </div>
+                      )}
                     </div>
 
-                    {quote.estado === 'pendiente' && (
-                      <div className="mt-4 flex space-x-2">
+                    {/* Actions for professionals */}
+                    {user.role === 'profesional' && quote.estado === 'pendiente' && (
+                      <div className="flex space-x-3 mt-4 lg:mt-0 lg:ml-6">
                         <button
-                          onClick={() => {
-                            const precio = prompt('Precio ($):');
-                            const comentario = prompt('Comentario:');
-                            if (precio && comentario) {
-                              handleRespond(quote.id, 'accept', precio, comentario);
-                            }
-                          }}
-                          className="bg-primary text-white px-4 py-1 rounded-md text-sm hover:bg-emerald-600 transition"
+                          onClick={() => handleAccept(quote.id)}
+                          className="bg-emerald-600 text-white px-6 py-3 rounded-lg hover:bg-emerald-700 transition-colors duration-200 font-medium"
                         >
                           Aceptar
                         </button>
                         <button
-                          onClick={() => handleRespond(quote.id, 'reject')}
-                          className="border border-gray-300 text-gray-700 px-4 py-1 rounded-md text-sm hover:bg-gray-50 transition"
+                          onClick={() => handleReject(quote.id)}
+                          className="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition-colors duration-200 font-medium"
                         >
                           Rechazar
                         </button>
                       </div>
                     )}
-
-                    {quote.estado === 'aceptado' && (
-                      <div className="mt-4 p-3 bg-green-50 rounded-md">
-                        <p className="text-green-800 font-medium">Precio: ${quote.precio}</p>
-                        <p className="text-green-700">{quote.comentario}</p>
-                      </div>
-                    )}
                   </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-gray-600">Aún no has recibido solicitudes de cotización.</p>
+                </div>
+              ))
             )}
-          </div>
-        </div>
-
-        <div>
-          <div className="bg-white rounded-lg shadow p-6 mb-8">
-            <h2 className="text-2xl font-bold mb-4">Acciones Rápidas</h2>
-            <div className="space-y-4">
-              <button className="w-full text-left p-4 border rounded-lg hover:shadow-md transition">
-                <div className="font-medium">Actualizar Perfil</div>
-                <div className="text-gray-600 text-sm">Mejora tu visibilidad ante clientes</div>
-              </button>
-              <button className="w-full text-left p-4 border rounded-lg hover:shadow-md transition">
-                <div className="font-medium">Mis Servicios Agendados</div>
-                <div className="text-gray-600 text-sm">Verifica tus citas confirmadas</div>
-              </button>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-2xl font-bold mb-4">Ayuda</h2>
-            <div className="space-y-4 text-gray-600">
-              <p><strong>¿Cómo funciona?</strong> Los clientes envían solicitudes de presupuesto y tú puedes aceptar o rechazar con tu oferta.</p>
-              <p><strong>¿Cuánto cuesta?</strong> El servicio es gratuito, solo cobras por tus servicios realizados.</p>
-              <p><strong>¿Cómo responder?</strong> Si aceptas, proporciona un precio y comentario detallado.</p>
-            </div>
           </div>
         </div>
       </div>

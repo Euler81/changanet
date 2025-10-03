@@ -12,7 +12,7 @@ const ChatWidget = ({ otherUserId }) => {
 
   useEffect(() => {
     // CONECTAR A SOCKET.IO
-    const newSocket = io('');
+    const newSocket = io('http://localhost:3007');
     setSocket(newSocket);
 
     // ESCUCHAR MENSAJES EN TIEMPO REAL

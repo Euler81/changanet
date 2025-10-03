@@ -1,98 +1,207 @@
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+
 const ClientDashboard = ({ user }) => {
-    const activeServices = [
-      { id: '1', professional: 'Juan Pérez', service: 'Reparación de fuga', status: 'Agendado', date: '2023-08-25' },
-      { id: '2', professional: 'María López', service: 'Instalación eléctrica', status: 'Completado', date: '2023-08-20' },
-    ];
-  
-    const conversations = [
-      { id: '1', professional: 'Juan Pérez', lastMessage: 'Perfecto, estaré allí a las 10.', time: '10:30 AM' },
-      { id: '2', professional: 'Carlos Gómez', lastMessage: '¿Puede ser mañana?', time: '09:15 AM' },
-    ];
-  
+  const [stats, setStats] = useState({
+    activeServices: 0,
+    completedServices: 0,
+    pendingQuotes: 0,
+    unreadNotifications: 0
+  });
+  const [recentServices, setRecentServices] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const fetchDashboardData = async () => {
+    try {
+      // Fetch services, quotes, notifications
+      const [servicesRes, quotesRes, notificationsRes] = await Promise.all([
+        fetch('/api/quotes/client/services', {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('changanet_token')}` }
+        }),
+        fetch('/api/quotes/client', {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('changanet_token')}` }
+        }),
+        fetch('/api/notifications', {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('changanet_token')}` }
+        })
+      ]);
+
+      if (servicesRes.ok) {
+        const services = await servicesRes.json();
+        setRecentServices(services.slice(0, 3));
+        setStats(prev => ({
+          ...prev,
+          activeServices: services.filter(s => s.estado === 'agendado').length,
+          completedServices: services.filter(s => s.estado === 'completado').length
+        }));
+      }
+
+      if (quotesRes.ok) {
+        const quotes = await quotesRes.json();
+        setStats(prev => ({
+          ...prev,
+          pendingQuotes: quotes.filter(q => q.estado === 'pendiente').length
+        }));
+      }
+
+      if (notificationsRes.ok) {
+        const notifications = await notificationsRes.json();
+        setStats(prev => ({
+          ...prev,
+          unreadNotifications: notifications.filter(n => !n.esta_leido).length
+        }));
+      }
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
     return (
-      <div>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-lg shadow p-6 mb-8">
-              <h2 className="text-2xl font-bold mb-4">Mis Servicios</h2>
-              <div className="space-y-4">
-                {activeServices.map(service => (
-                  <div key={service.id} className="border rounded-lg p-4 hover:shadow-md transition">
-                    <div className="flex justify-between">
-                      <div>
-                        <h3 className="font-semibold">{service.professional}</h3>
-                        <p className="text-gray-600">{service.service}</p>
-                      </div>
-                      <div className="text-right">
-                        <span className={`px-2 py-1 rounded-full text-xs ${
-                          service.status === 'Completado' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
-                        }`}>
-                          {service.status}
-                        </span>
-                        <p className="text-gray-500 text-sm mt-1">{service.date}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+      <div className="flex items-center justify-center py-12">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-8">
+      {/* Welcome Section */}
+      <div className="bg-gradient-to-r from-emerald-50 to-turquoise-50 rounded-2xl p-6">
+        <h1 className="text-3xl font-bold text-gray-800 mb-2">
+          ¡Hola, {user.name}!
+        </h1>
+        <p className="text-gray-600">
+          Bienvenido a tu panel de cliente. Gestiona tus servicios y encuentra nuevos profesionales.
+        </p>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
+          <div className="flex items-center">
+            <div className="p-3 bg-emerald-100 rounded-lg">
+              <span className="text-2xl">🔧</span>
             </div>
-  
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-2xl font-bold mb-4">Mensajes</h2>
-              <div className="space-y-4">
-                {conversations.map(conv => (
-                  <div key={conv.id} className="border rounded-lg p-4 hover:shadow-md transition cursor-pointer">
-                    <div className="flex justify-between">
-                      <h3 className="font-semibold">{conv.professional}</h3>
-                      <span className="text-gray-500 text-sm">{conv.time}</span>
-                    </div>
-                    <p className="text-gray-600 mt-1">{conv.lastMessage}</p>
-                  </div>
-                ))}
-              </div>
+            <div className="ml-4">
+              <p className="text-sm font-medium text-gray-600">Servicios Activos</p>
+              <p className="text-2xl font-bold text-gray-800">{stats.activeServices}</p>
             </div>
           </div>
-  
-          <div>
-            <div className="bg-white rounded-lg shadow p-6 mb-8">
-              <h2 className="text-2xl font-bold mb-4">Acciones Rápidas</h2>
-              <div className="space-y-4">
-                <button className="w-full text-left p-4 border rounded-lg hover:shadow-md transition">
-                  <div className="font-medium">Buscar un Profesional</div>
-                  <div className="text-gray-600 text-sm">Encuentra ayuda para tu próximo proyecto</div>
-                </button>
-                <button className="w-full text-left p-4 border rounded-lg hover:shadow-md transition">
-                  <div className="font-medium">Publicar un Servicio</div>
-                  <div className="text-gray-600 text-sm">Recibe presupuestos de profesionales</div>
-                </button>
-                <button className="w-full text-left p-4 border rounded-lg hover:shadow-md transition">
-                  <div className="font-medium">Mis Métodos de Pago</div>
-                  <div className="text-gray-600 text-sm">Gestiona tus tarjetas y métodos de pago</div>
-                </button>
-              </div>
+        </div>
+
+        <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
+          <div className="flex items-center">
+            <div className="p-3 bg-amber-100 rounded-lg">
+              <span className="text-2xl">✅</span>
             </div>
-  
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-2xl font-bold mb-4">Perfil</h2>
-              <div className="flex items-center mb-4">
-                <img 
-                  src="https://placehold.co/60" 
-                  alt={user.name} 
-                  className="w-12 h-12 rounded-full object-cover mr-4"
-                />
-                <div>
-                  <div className="font-medium">{user.name}</div>
-                  <div className="text-gray-600 text-sm">{user.email}</div>
-                </div>
-              </div>
-              <button className="w-full py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition">
-                Editar Perfil
-              </button>
+            <div className="ml-4">
+              <p className="text-sm font-medium text-gray-600">Servicios Completados</p>
+              <p className="text-2xl font-bold text-gray-800">{stats.completedServices}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
+          <div className="flex items-center">
+            <div className="p-3 bg-blue-100 rounded-lg">
+              <span className="text-2xl">📝</span>
+            </div>
+            <div className="ml-4">
+              <p className="text-sm font-medium text-gray-600">Cotizaciones Pendientes</p>
+              <p className="text-2xl font-bold text-gray-800">{stats.pendingQuotes}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
+          <div className="flex items-center">
+            <div className="p-3 bg-red-100 rounded-lg">
+              <span className="text-2xl">🔔</span>
+            </div>
+            <div className="ml-4">
+              <p className="text-sm font-medium text-gray-600">Notificaciones</p>
+              <p className="text-2xl font-bold text-gray-800">{stats.unreadNotifications}</p>
             </div>
           </div>
         </div>
       </div>
-    );
-  };
-  
-  export default ClientDashboard;
+
+      {/* Quick Actions */}
+      <div className="bg-white p-6 rounded-2xl shadow-lg">
+        <h2 className="text-xl font-bold text-gray-800 mb-4">Acciones Rápidas</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Link
+            to="/profesionales"
+            className="flex items-center p-4 bg-emerald-50 rounded-lg hover:bg-emerald-100 transition-colors duration-200"
+          >
+            <span className="text-2xl mr-3">🔍</span>
+            <div>
+              <h3 className="font-semibold text-gray-800">Buscar Profesionales</h3>
+              <p className="text-sm text-gray-600">Encuentra el servicio que necesitas</p>
+            </div>
+          </Link>
+
+          <Link
+            to="/mi-cuenta/presupuestos"
+            className="flex items-center p-4 bg-amber-50 rounded-lg hover:bg-amber-100 transition-colors duration-200"
+          >
+            <span className="text-2xl mr-3">📋</span>
+            <div>
+              <h3 className="font-semibold text-gray-800">Mis Presupuestos</h3>
+              <p className="text-sm text-gray-600">Gestiona tus solicitudes</p>
+            </div>
+          </Link>
+
+          <Link
+            to="/mi-cuenta"
+            className="flex items-center p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors duration-200"
+          >
+            <span className="text-2xl mr-3">⚙️</span>
+            <div>
+              <h3 className="font-semibold text-gray-800">Configuración</h3>
+              <p className="text-sm text-gray-600">Actualiza tu perfil</p>
+            </div>
+          </Link>
+        </div>
+      </div>
+
+      {/* Recent Services */}
+      {recentServices.length > 0 && (
+        <div className="bg-white p-6 rounded-2xl shadow-lg">
+          <h2 className="text-xl font-bold text-gray-800 mb-4">Servicios Recientes</h2>
+          <div className="space-y-4">
+            {recentServices.map(service => (
+              <div key={service.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                <div>
+                  <h3 className="font-semibold text-gray-800">{service.descripcion}</h3>
+                  <p className="text-sm text-gray-600">
+                    Profesional: {service.profesional.nombre} • Estado: {service.estado}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                    service.estado === 'completado' ? 'bg-emerald-100 text-emerald-800' :
+                    service.estado === 'agendado' ? 'bg-amber-100 text-amber-800' :
+                    'bg-gray-100 text-gray-800'
+                  }`}>
+                    {service.estado}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default ClientDashboard;

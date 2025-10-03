@@ -17,7 +17,7 @@ exports.sendNotification = async (userId, type, message) => {
         usuario_id: userId, // ID del usuario que recibirá la notificación
         tipo: type, // Tipo de notificación (ej: 'nuevo_mensaje', 'nueva_cotización', 'servicio_agendado')
         mensaje: message, // Contenido textual de la notificación
-        está_leído: false, // La notificación se marca como no leída por defecto
+        esta_leido: false, // La notificación se marca como no leída por defecto
       },
     });
     console.log(`🔔 Notificación enviada a ${userId}: ${message}`);
